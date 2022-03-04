@@ -34,10 +34,7 @@ print("Variant VC Bound:", np.sqrt(16 / N * np.log(2 * N ** d_vc / np.sqrt(delta
 
 
 #%%%
-# Question 17
-import random
-import numpy as np
-
+# Question 17, 18
 def generate_data(size=20, noise=0.2):
     xs = []
     ys = []
@@ -65,24 +62,81 @@ def compute_E_in(x, y, s, theta):
             errorNum += 1
     return errorNum / len(x)
 
+def compute_E_out(best_s, best_theta):
+    return 0.5 + 0.3 * best_s * (np.abs(best_theta) - 1)
+
 def trainDecisionStump():
     x, y = generate_data()
     best_E_in = 1
     sorted_x = np.sort(x)
     for current_theta in sorted_x:
-        for s in [-1, 1]:
-            current_E_in = compute_E_in(x, y, s, current_theta)
+        for current_s in [-1, 1]:
+            current_E_in = compute_E_in(x, y, current_s, current_theta)
             if current_E_in < best_E_in:
                 best_E_in = current_E_in
-    return best_E_in
+                best_theta = current_theta
+                best_s = current_s
+    E_out = compute_E_out(best_s, best_theta)
+    return best_E_in, E_out
 
 
 iteration = 5000
-err_in_sum = 0
+E_in_all = []
+E_out_all = []
 for i in range(iteration):
-    err_in = trainDecisionStump()
-    err_in_sum += err_in
+    E_in, E_out = trainDecisionStump()
+    E_in_all.append(E_in)
+    E_out_all.append(E_out)
     if i % 1000 == 999:
         print("iteration: ", i + 1)
-print("total errorRate in sample is", err_in_sum / iteration)
+print("Average E_in is", np.average(E_in_all))
+print("Average E_out is", np.average(E_out_all))
+
+#%%%
+# Question 19
+import numpy as np
+import random
+import pandas as pd
+
+def hFunc(x, s, theta):
+    if x - theta == 0:
+        return s
+    else:
+        return np.sign(x - theta) * s
+
+def compute_E_in(x, y, s, theta):
+    errorNum = 0
+    for i in range(len(x)):
+        if y[i] != hFunc(x[i], s, theta):
+            errorNum += 1
+    return errorNum / len(x)
+
+def compute_E_out(best_s, best_theta):
+    return 0.5 + 0.3 * best_s * (np.abs(best_theta) - 1)
+
+def trainDecisionStump(data):
+    all_E_in = []
+    y = train_data['9']
+    for column in train_data.columns[:-1]:
+        x = train_data[column]
+        best_E_in = 1
+        sorted_x = np.sort(x)
+        for current_theta in sorted_x:
+            for current_s in [-1, 1]:
+                current_E_in = compute_E_in(x, y, current_s, current_theta)
+                if current_E_in < best_E_in:
+                    best_E_in = current_E_in
+        all_E_in.append(best_E_in)
+    print("All E_in:", all_E_in)
+    print("Best E_in:", np.min(all_E_in))
+    # return best_E_in
+
+train_data = pd.read_csv('hw2_train.dat', header=None, delimiter=r'\s+')
+train_data.columns = train_data.columns.astype(str)
+print(train_data.columns)
+print(train_data.head(5))
+
+trainDecisionStump(data=train_data)
+# test_data = pd.read_csv('hw2_test.dat', header=None, delimiter=r'\s+')
+
 
