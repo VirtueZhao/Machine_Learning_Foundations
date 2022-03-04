@@ -116,6 +116,10 @@ def compute_E_out(best_s, best_theta):
 
 def trainDecisionStump(data):
     all_E_in = []
+    all_best_E_in = 1
+    all_best_theta = 0
+    all_best_s = 1
+    best_column = '0'
     y = train_data['9']
     for column in train_data.columns[:-1]:
         x = train_data[column]
@@ -126,17 +130,34 @@ def trainDecisionStump(data):
                 current_E_in = compute_E_in(x, y, current_s, current_theta)
                 if current_E_in < best_E_in:
                     best_E_in = current_E_in
+                    best_theta = current_theta
+                    best_s = current_s
+        if best_E_in < all_best_E_in:
+            all_best_E_in = best_E_in
+            all_best_theta = best_theta
+            all_best_s = best_s
+            best_column = column
         all_E_in.append(best_E_in)
-    print("All E_in:", all_E_in)
-    print("Best E_in:", np.min(all_E_in))
-    # return best_E_in
+    # print("All E_in:", all_E_in)
+    return all_best_E_in, all_best_theta, all_best_s, best_column
 
 train_data = pd.read_csv('hw2_train.dat', header=None, delimiter=r'\s+')
 train_data.columns = train_data.columns.astype(str)
 print(train_data.columns)
 print(train_data.head(5))
 
-trainDecisionStump(data=train_data)
-# test_data = pd.read_csv('hw2_test.dat', header=None, delimiter=r'\s+')
+best_E_in, best_theta, best_s, best_column = trainDecisionStump(data=train_data)
+print("Best E_in:", np.min(best_E_in))
+print("Best Column:", best_column)
+print("Best Theta:", best_theta)
+print("Best s:", best_s)
 
+#%%%
+# Question 20
+test_data = pd.read_csv('hw2_test.dat', header=None, delimiter=r'\s+')
+test_data.columns = test_data.columns.astype(str)
+test_x = test_data[best_column]
+test_y = test_data['9']
+test_error = compute_E_in(test_x, test_y, best_s, best_theta)
+print("Test Error:", test_error)
 
