@@ -77,3 +77,82 @@ for i in range(5):
     E = exp(u_val) + exp(2 * v_val) + exp(u_val * v_val) + u_val ** 2 - 2 * u_val * v_val + 2 * v_val ** 2 - 3 * u_val - 2 * v_val
     print("E:", E)
 
+
+#%%%
+# Question 13
+import numpy as np
+import random
+
+def generateData(size=1000):
+    xs = []
+    ys = []
+    for i in range(size):
+        x1 = random.uniform(-1, 1)
+        x2 = random.uniform(-1, 1)
+        y = np.sign(x1 ** 2 + x2 ** 2 - 0.6)
+        prob = random.uniform(0, 1)
+        if prob < 0.1:
+            y = -y
+        xs.append([1, x1, x2])
+        ys.append([y])
+    return np.mat(xs), np.array(ys)
+
+
+def errorRate(w, x, y):
+    pred_y = np.array(x * w)
+    print(y)
+    # print(pred_y)
+    pred_y = np.array(list(map(np.sign, pred_y)))
+    errorNum = np.sum(pred_y != y)
+    return errorNum / len(y)
+
+errorSum = 0
+for i in range(1):
+    print("Iteration:", i)
+    x, y = generateData()
+    w = np.array(np.linalg.pinv(x) * y)
+    errorSum += errorRate(w, x, y)
+
+print("Average In Sample Error:", errorSum/1000)
+
+#%%%
+# Question 14 & 15
+import numpy as np
+import random
+
+def generateData(size=1000):
+    xs = []
+    ys = []
+    for i in range(size):
+        x1 = random.uniform(-1, 1)
+        x2 = random.uniform(-1, 1)
+        y = np.sign(x1 ** 2 + x2 ** 2 - 0.6)
+        prob = random.uniform(0, 1)
+        if prob < 0.1:
+            y = -y
+        xs.append([1, x1, x2, x1 * x2, x1 ** 2, x2 ** 2])
+        ys.append([y])
+    return np.mat(xs), np.array(ys)
+
+
+def errorRate(w, x, y):
+    pred_y = np.array(x * w)
+    pred_y = np.array(list(map(np.sign, pred_y)))
+    errorNum = np.sum(pred_y != y)
+    return errorNum / len(y)
+
+
+errorSum = 0
+for i in range(1000):
+    if (i + 1) % 100 == 0:
+        print("Iteration:", i+1)
+    x, y = generateData()
+    # w = np.array(np.linalg.pinv(x) * y)
+    # w = np.array([[-1], [-0.05], [0.08], [0.13], [1.5], [15]])
+    # w = np.array([[-1], [-0.05], [0.08], [0.13], [15], [1.5]])
+    # w = np.array([[-1], [-1.5], [0.08], [0.13], [0.05], [1.5]])
+    # w = np.array([[-1], [-0.05], [0.08], [0.13], [1.5], [1.5]])
+    w = np.array([[-1], [-1.5], [0.08], [0.13], [0.05], [0.05]])
+    errorSum += errorRate(w, x, y)
+
+print("Average In Sample Error:", errorSum/1000)
